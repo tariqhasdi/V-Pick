@@ -1,14 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package parcVelo;
-
-/**
- *
- * @author Tariq
- */
+package parcvelo;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -30,7 +20,6 @@ public class LesBornettes {
 		this.conn = conn;
 		this.numBornette = numBornette;
 		this.idVelo = idVelo;
-		initIdVelo();
 	}
 	
 	public LesBornettes(Connection conn, int numBornette) {
@@ -50,7 +39,6 @@ public class LesBornettes {
 					);
 			res.first();
 			idVelo = res.getInt(1);	
-			System.out.println("ID VLEO associer bornette = " + idVelo);
 			r.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -61,7 +49,6 @@ public class LesBornettes {
 		} else {
 			this.idVelo = idVelo;
 		}
-		System.out.println("ID VLEO associer bornette final = " + this.idVelo);
 		
 	}
 	
@@ -90,8 +77,9 @@ public class LesBornettes {
 	public void attacherVeloBD() {
 		CallableStatement cstmt;
 	    try {
-	    	cstmt = conn.prepareCall ("call attacherVelo (?)");		    
-		    cstmt.setInt (1, idVelo); 			   
+	    	cstmt = conn.prepareCall ("call attacherVelo (?, ?)");		    
+		    cstmt.setInt (1, numBornette); 	
+		    cstmt.setInt (2, idVelo);
 		    cstmt.execute ();
 		    cstmt.close();
 	    } catch (SQLException e) {
@@ -102,4 +90,3 @@ public class LesBornettes {
 	
 	
 }
-

@@ -1,21 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package utils;
-
-/**
- *
- * @author Tariq
- */
-
 
 import java.util.Scanner;
 import java.sql.*;
 
-import parcVelo.LesNonAbonnes;
-import parcVelo.LesStations;
+import parcvelo.LesNonAbonnes;
+import parcvelo.LesStations;
 
 public class Dialogue {
 	
@@ -192,4 +181,3 @@ public class Dialogue {
 	 }
 	 
 }
-

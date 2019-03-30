@@ -1,14 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package parcVelo;
-
-/**
- *
- * @author Tariq
- */
+package parcvelo;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -49,12 +39,15 @@ public class LesAbonnes extends LesClients {
 		this.adresse = adresse;		
 		this.codeSecret = codeSecret;
 		setNumCB(numCB);
-		this.idClient = trouveOuCreeUnClientBD();
+		ajouteUnNouveauClientBD();
+		this.idClient = trouveDernierClient();
+		System.out.println("IDCLIENT: " + idClient);
 		// TODO Auto-generated constructor stub
 	}
 	
+	
 	public int getIdClient() {
-		return idClient;
+		return trouveDernierClient();
 	}
 	
 	public String getCodeSecret() {
@@ -62,6 +55,7 @@ public class LesAbonnes extends LesClients {
 	}
 	
 	public boolean ajouteUnNouveauAbonneBD() {
+		System.out.println("TEST : IDCLIENT -> " + idClient);
 		boolean success = false;
 	    CallableStatement cstmt;
 	    try {
@@ -189,7 +183,7 @@ public class LesAbonnes extends LesClients {
 			location.setNumBornetteA(numBornette);
 			bornette = new LesBornettes(conn, numBornette, idVeloARendre);
 			bornette.attacherVeloBD();
-			location.clotureUneLocationBD(false);			
+			location.clotureUneLocationBD();			
 			System.out.println(" Velo " + idVeloARendre + " attachez à la bornette  " + numBornette + " !");
 			if(classifications == Classifications.VMOINS) {
 				System.out.println("Vous beneficiez d'un prime de 1min car vous rendez un velo dans une station Vmoins");
@@ -227,6 +221,8 @@ public class LesAbonnes extends LesClients {
 				e.printStackTrace();
 			}
 	 }
+	
+	
+	
 
 }
-

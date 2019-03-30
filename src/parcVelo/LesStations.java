@@ -1,14 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package parcVelo;
-
-/**
- *
- * @author Tariq
- */
+package parcvelo;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -26,7 +16,6 @@ import utils.LectureClavier;
 public class LesStations {
 	
 	private Connection conn;
-	
 	private int idStation;
 	private String adresse;
 		
@@ -35,8 +24,7 @@ public class LesStations {
 		this.idStation = idStation;
 		// SQL pour obtenir l'adresse 
 	}
-	
-	
+		
 	public int getIdStation() {
 		return idStation;
 	}
@@ -60,39 +48,54 @@ public class LesStations {
 		return qtVelosParModeles;
 	}
 
-	/* 
-	 *  La position des bornettes est en fonction de leurs id.
-	 *  Par exemple, la bornette 15 est plus proche que la bornette 25
-	 */
 	public int trouvePremiereBornetteOccupeEnFonctionDuModeleVelo(String libelle) {
 		int numBornette = -1;
 		Statement r;
 		try {
 			r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE); // Sans ces parametres JDBC crash				
 			ResultSet res = r.executeQuery(
-					"SELECT min(numBornette) FROM LesBornettes NATURAL JOIN LesModeles WHERE idStation = " + idStation + " AND libelle = '" + libelle +"' AND idVelo IS NOT NULL"
+					"SELECT min(numBornette) FROM LesBornettes NATURAL JOIN LesVelos NATURAL JOIN LesModeles WHERE idStation = " + idStation + " AND libelle = '" + libelle +"'"
 					);
-			 res.first();
-			numBornette = res.getInt(1);		
-			System.out.println("Num bornette occupé: " + numBornette );
-			r.close();
+			if (res.first()) {
+                            numBornette = res.getInt(1);
+                            LesBornettes bornette = new LesBornettes(conn, numBornette);
+                            System.out.println("    -> La bornette " + numBornette + " s'ouvre et libere le velo " + bornette.getIdVelo() + " ...");
+                        }
+                        r.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if(numBornette==-1) {
-			System.out.println("Echec de la requete: trouvePremiereBornetteOccupeEnFonctionDuModeleVelo");
+			System.out.println("Echec de la requete: trouvePremiereBornetteOccupeEnFonctionDuModeleVelo ou il y a aucun vélo !");
 		}
 		return numBornette;
+	}
+	
+	public boolean estDejaDansUneStation(int idVelo) {
+		boolean trouve = false;
+		Statement r;
+		try {
+			r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE); // Sans ces parametres JDBC crash					
+			ResultSet res = r.executeQuery(
+					"SELECT * FROM LesBornettes WHERE idVelo = " + idVelo
+					);
+			trouve = res.first();
+			r.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return trouve;
 	}
 	
 	public int trouvePremiereBornetteLibre() {
 		int numBornette = -1;
 		Statement r;
 		try {
-			r = conn.createStatement();			
+			r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE); // Sans ces parametres JDBC crash					
 			ResultSet res = r.executeQuery(
-					"SELECT min(numBornette) FROM LesBornettes WHERE idStation = " + idStation + "' AND idVelo  NULL"
+					"SELECT min(numBornette) FROM LesBornettes WHERE idStation = " + idStation + " AND idVelo IS NULL"
 					);
 			res.first();
 			numBornette = res.getInt(1);		
@@ -102,8 +105,9 @@ public class LesStations {
 			e.printStackTrace();
 		}
 		if(numBornette==-1) {
-			System.out.println("Echec de la requete: trouvePremiereBornetteOccupeEnFonctionDuModeleVelo");
+			System.out.println("Echec de la requete: trouvePremiereBornetteLibre");
 		}
+		System.out.println("NUM BORNETTE LIBRE -> " + numBornette);
 		return numBornette;
 	}
 	
@@ -216,4 +220,3 @@ public class LesStations {
 	}
 
 }
-

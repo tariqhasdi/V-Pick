@@ -1,16 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package parcVelo;
-
-/**
- *
- * @author Tariq
- */
+package parcvelo;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class LesLocations {
 	
@@ -28,9 +19,12 @@ public class LesLocations {
 	
 	public LesLocations(Connection conn, int idClient) {
 		// TODO Auto-generated constructor stub
+		this.conn = conn;
 	}
-	public LesLocations(Connection conn, String codeSecret) {
+	public LesLocations(Connection conn, int idVelo, String codeSecret) {
 		// TODO Auto-generated constructor stub
+		this.conn = conn;
+		this.idVelo = idVelo;
 		this.codeSecret = codeSecret;
 	}
 	public LesLocations(Connection conn, int idVelo, int idClient, int numBornetteD, boolean estUnAbonne) {
@@ -40,7 +34,7 @@ public class LesLocations {
 		this.idClient = idClient;
 		this.numBornetteD = numBornetteD;
 		if(!estUnAbonne) {
-			generationCodeSecret(10);
+			generationCodeSecret(5);
 			ajouteUneLocationBD(false);
 		} else {
 			ajouteUneLocationBD(true);
@@ -49,17 +43,19 @@ public class LesLocations {
 		
 	}
 	
+	public void setIdVelo(int idVelo) {
+		this.idVelo = idVelo;
+	}
+	
 	
 	private void generationCodeSecret(int length) {
-		String chars = "azertyuiopmlkjhgfdsqwxcvbn,;:!ų^$*&é'(-č_įā)=123456789*/-+.";
+		String chars = "azertyuiopmlkjhgfdsqwxcvbn123456789";
 		String codeSecret = "";
 		for(int i = 0; i < length; i++) {
 			int indice = (int) (Math.random()*chars.length()-1);
 			codeSecret += chars.charAt(indice);
 		}
-		System.out.println("   - Veuillez prendre note du code suivant : " );
-		System.out.println("      " + codeSecret);
-		System.out.println("    Lorsque vous rendrez votre vélo, saissiez le code sur la borne afin d'ouvrir une bornette");
+		System.out.print("   - Veuillez prendre note du code suivant : " + codeSecret + "\n");		
 		this.codeSecret = codeSecret;
 	}
 	
@@ -91,12 +87,14 @@ public class LesLocations {
 		int idVelo = -1;
 		Statement r;
 		try {
-			r = conn.createStatement();			
+			r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE); // Sans ces parametres JDBC crash					
 			ResultSet res = r.executeQuery(
-					"SELECT idVelo FROM LesLocations WHERE codeSecret = '" + codeSecret +"'"
+					"SELECT idVelo FROM LesLocations WHERE codeSecret = '" + codeSecret +"' AND cout IS NULL"
 					);
-			 res.first();
-			idVelo = res.getInt(1);		
+			if(res.first()) {
+				idVelo = res.getInt(1);	
+			}
+				
 			r.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -121,19 +119,13 @@ public class LesLocations {
 		}
 		return match;
 	}
-	public void clotureUneLocationBD(boolean abonne) { //HHH
+	public void clotureUneLocationBD() { //HHH
 		CallableStatement cstmt;
-	    try {
-	    	
-	    	if(abonne) {
-	    		cstmt = conn.prepareCall ("call clotureUneLocation (?)");	
-	    		cstmt.setInt (1, numBornetteA); 	
-	    	} else {
-	    		cstmt = conn.prepareCall ("call clotureUneLocation (?, ?)");	
-	    		cstmt.setString (1, codeSecret); 	
-	 		    cstmt.setInt(2, numBornetteA);
-	    	}
-		   
+		System.out.println("IDVELO: " + idVelo + " BORN: " + numBornetteA);
+	    try {    	
+	    	cstmt = conn.prepareCall ("call clotureUneLocation (?, ?)");	
+	    	cstmt.setInt (1, numBornetteA); 	
+	    	cstmt.setInt (2, idVelo); 	
 		    cstmt.execute ();
 		    cstmt.close();
 	    } catch (SQLException e) {
@@ -146,7 +138,8 @@ public class LesLocations {
 		this.numBornetteA = numBornetteA;
 	}
 	
-	public void afficheVelosClient() {
+	public ArrayList<String> afficheVelosClient() {
+		ArrayList<String> mesVelos = new ArrayList<String>();
 		Statement r;
 		try {
 			r = conn.createStatement();			
@@ -155,16 +148,17 @@ public class LesLocations {
 					);
 			while(res.next()) {
 				System.out.println("  ID: " + res.getInt("idVelo"));
+				mesVelos.add(res.getString(1));
 			}
 			r.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return mesVelos;
 	}
 	
 	
 
 	
 }
-

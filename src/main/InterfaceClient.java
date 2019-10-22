@@ -16,7 +16,7 @@ public class InterfaceClient {
 	// Ne pas oublier d'anomymiser le PASSWD avant de rendre votre travail
 
 		static final String USER = "hasdit";
-                static final String PASSWD = "az1ER2t3";                                                                                                    //static final String PASSWD = "DarkFire123";
+                static final String PASSWD = "********";                                                                                                    //static final String PASSWD = "DarkFire123";
 
 		static Connection conn; 
 		
